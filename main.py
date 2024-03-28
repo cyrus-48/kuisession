@@ -54,6 +54,20 @@ async def update_todo(id: int , todo: TodoCreate , db: Session = Depends(get_db)
     updated_todo = db.query(Todo).filter(Todo.id == id).first()
     return updated_todo
 
+@app.patch('/todo/update/status/{id}' ,  response_model=TodoInDB)
+async def change_status(id:int , db:Session = Depends(get_db)):
+    todo = db.query(Todo).filter(Todo.id == id).first()
+    if not todo:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f'Todo with id {id} not found')
+    
+    todo.is_completed = True 
+    db.commit()
+    db.refresh(todo)
+    return todo
+    
+    
+    
+
 @app.delete('/todos/destroy/{id}' , response_model=TodoInDB)
 async def delete_todo(id: int , db: Session = Depends(get_db)):
     todo = db.query(Todo).filter(Todo.id == id).first()
@@ -62,6 +76,8 @@ async def delete_todo(id: int , db: Session = Depends(get_db)):
     db.delete(todo)
     db.commit()
     return todo
+
+
 
 
 
